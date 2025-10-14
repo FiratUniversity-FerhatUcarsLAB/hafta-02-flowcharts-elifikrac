@@ -1,0 +1,363 @@
+E-ticaret sitesinde ürün ekleme, sepet yönetimi ve ödeme sürecini 
+ modelleyin.
+ Sistem Gereksinimleri:
+ Kullanıcı giriş kontrolü (koşul) 
+ Ürün kategorileri arasında gezinme (döngü) 
+ Ürün sepete ekleme 
+ Stok kontrolü (koşul) 
+ Sepeti görüntüleme ve düzenleme (döngü) 
+ İndirim kodu uygulanabilir (koşul) 
+ Minimum 50 TL kontrolü (koşul) 
+ Kargo ücreti hesaplama (koşul: ¿200 TL ücretsiz) 
+ Ödeme yöntemi seçimi (koşul) 
+ Sipariş onayı E-ticaret sitesinde sepet yönetimi ve ödeme sistemini adım adım açıkla. “Bu sistemi pseudocode olarak yaz. Döngüler için DÖNGÜ, koşullar için 
+ EĞER- İSE kullan. Her adımı BAŞLA ile başlat, BİTİR ile bitir. Tüm 
+ kontrol noktalarını belirt. 
+ Kullanıcı girişi, ürün ekleme, stok kontrolü, indirim kodu, kargo hesaplama 
+ ve ödeme aşamalarını içermeli.
+
+BAŞLA
+
+// --- Değişkenler ---
+kullanici_giris = false
+kullanici_ad = ""
+kullanici_sifre = ""
+katalog = [kategori_listesi ve ürünler]    // her ürün: {id, isim, fiyat, stok, kategori}
+sepet = []                                 // sepet elemanları: {urun_id, isim, fiyat, adet}
+toplam = 0
+indirim_kodu = ""
+indirim_tutar = 0
+kargo_ucreti = 0
+odeme_yontemi = ""
+MINIMUM_SIPARIS = 50
+UCRETSIZ_KARGO_LIMIT = 200
+STANDART_KARGO = 20
+
+// --- Kullanıcı Girişi ---
+YAZ "Kullanıcı adı giriniz:"
+OKU kullanici_ad
+YAZ "Şifre giriniz:"
+OKU kullanici_sifre
+
+EĞER kullanici_ad ve kullanici_sifre doğrulanıyor mu? İSE
+    kullanici_giris = true
+    YAZ "Giriş başarılı. Hoşgeldiniz, ", kullanici_ad
+DEĞİLSE
+    YAZ "Giriş başarısız. Lütfen giriş yapınız veya kaydolunuz."
+    DUR
+BİTİŞEĞER
+
+// --- Kategori gezinti ve ürün seçimi (döngü) ---
+DÖNGÜ true
+    YAZ "Ürün kategorileri:"
+    YAZ kategori_listesini göster
+    YAZ "Gezinmek istediğiniz kategori id'sini girin veya 'checkout' yazın:"
+    OKU secim
+    
+    EĞER secim = "checkout" İSE
+        ÇIK // kategori döngüsünden çık ve ödeme sürecine geç
+    BİTİŞEĞER
+
+    // Kullanıcı seçtiği kategorideki ürünleri listeler
+    YAZ "Seçilen kategorideki ürünler:"
+    YAZ ürün_listesini göster(secim)
+
+    YAZ "Sepete eklemek için ürün id'si girin veya 'geri' yazın:"
+    OKU urun_id_giris
+
+    EĞER urun_id_giris = "geri" İSE
+        DEVAM ET // kategori listesine dön
+    BİTİŞEĞER
+
+    YAZ "Adet giriniz:"
+    OKU adet
+
+    // --- Stok kontrolü (koşul) ---
+    EĞER katalog[urun_id_giris].stok >= adet İSE
+        // Sepete ekle veya mevcutsa adeti arttır
+        EĞER sepetde_ayni_urun_var mı? İSE
+            sepet.adet += adet
+        DEĞİLSE
+            sepet'e ekle {urun_id, isim, fiyat, adet}
+        BİTİŞEĞER
+        katalog[urun_id_giris].stok -= 0   // stok gerçek azaltma ödemede yapılır; bunu opsiyonel belirt
+        YAZ "Ürün sepete eklendi."
+    DEĞİLSE
+        YAZ "Stok yetersiz! Mevcut stok: ", katalog[urun_id_giris].stok
+    BİTİŞEĞER
+
+    YAZ "Başka kategori gezmek ister misiniz? (E/H)"
+    OKU devam_kategori
+    EĞER devam_kategori = "H" VEYA devam_kategori = "h" İSE
+        ÇIK
+    DEĞİTSE
+        DEVAM ET
+    BİTİŞEĞER
+BİTİŞDÖNGÜ
+
+// --- Sepeti görüntüleme ve düzenleme (döngü) ---
+DÖNGÜ true
+    // Sepeti listele ve toplam hesapla
+    toplam = 0
+    YAZ "---- SEPET ----"
+    DÖNGÜ her sepet öğesi İÇİN
+        YAZ öğe.isim, " x", öğe.adet, " -> ", öğe.fiyat * öğe.adet, "TL"
+        toplam = toplam + (öğe.fiyat * öğe.adet)
+    BİTİŞDÖNGÜ
+    YAZ "Ara toplam: ", toplam, " TL"
+
+    YAZ "Sepeti düzenlemek ister misiniz? (E/H)"
+    OKU duzenle
+    EĞER duzenle = "E" VEYA duzenle = "e" İSE
+        YAZ "Silmek için ürün id girin veya adet güncellemek için 'id,adet' girin, bitirmek için 'tamam' yazın:"
+        OKU duzenle_islem
+
+        EĞER duzenle_islem = "tamam" İSE
+            ÇIK // düzenleme döngüsünden çık
+        DEĞİTSE
+            EĞER duzenle_islem içinde ',' var mı? İSE
+                // adet güncelle
+                OKU parçalara ayır -> id, yeni_adet
+                EĞER yeni_adet = 0 İSE
+                    sepetten sil id
+                DEĞİLSE
+                    sepet[id].adet = yeni_adet
+                BİTİŞEĞER
+            DEĞİLSE
+                // silme işlemi
+                sepetten sil duzenle_islem
+            BİTİŞEĞER
+        BİTİŞEĞER
+    DEĞİLSE
+        ÇIK
+    BİTİŞEĞER
+BİTİŞDÖNGÜ
+
+// --- İndirim kodu uygulanabilir (koşul) ---
+YAZ "İndirim kodu var mı? (Y/N)"
+OKU var_mi
+EĞER var_mi = "Y" VEYA var_mi = "y" İSE
+    YAZ "İndirim kodunu giriniz:"
+    OKU indirim_kodu
+    EĞER indirim_kodu geçerli mi? İSE
+        indirim_tutar = hesapla_indirim(toplam, indirim_kodu)   // örn. %10 veya sabit TL
+        YAZ "İndirim uygulandı: ", indirim_tutar, " TL"
+    DEĞİLSE
+        indirim_tutar = 0
+        YAZ "Geçersiz indirim kodu."
+    BİTİŞEĞER
+DEĞİLSE
+    indirim_tutar = 0
+BİTİŞEĞER
+
+ara_toplam = toplam - indirim_tutar
+
+// --- Minimum 50 TL kontrolü (koşul) ---
+EĞER ara_toplam < MINIMUM_SIPARIS İSE
+    YAZ "Siparişler için minimum tutar ", MINIMUM_SIPARIS, " TL'dir. Mevcut tutar: ", ara_toplam, " TL"
+    YAZ "Lütfen ürün ekleyin veya indirimleri kaldırın."
+    // Kullanıcıyı ürün ekleme akışına yönlendir veya işlemi sonlandır
+    DUR
+BİTİŞEĞER
+
+// --- Kargo ücreti hesaplama (koşul) ---
+EĞER ara_toplam >= UCRETSIZ_KARGO_LIMIT İSE
+    kargo_ucreti = 0
+    YAZ "Ücretsiz kargo uygulanıyor."
+DEĞİLSE
+    kargo_ucreti = STANDART_KARGO
+    YAZ "Kargo ücreti: ", kargo_ucreti, " TL"
+BİTİŞEĞER
+
+genel_toplam = ara_toplam + kargo_ucreti
+YAZ "Ödenecek toplam: ", genel_toplam, " TL"
+
+// --- Ödeme yöntemi seçimi (koşul) ---
+YAZ "Ödeme yöntemi seçin: 1) Kredi Kartı 2) Kapıda Ödeme 3) Havale/EFT"
+OKU odeme_secim
+EĞER odeme_secim = "1" İSE
+    odeme_yontemi = "Kredi Kartı"
+    // kredi kartı bilgileri alınır
+    YAZ "Kart numarası giriniz:"
+    OKU kart_no
+    YAZ "Son kullanma tarihi giriniz:"
+    OKU skt
+    YAZ "CVV giriniz:"
+    OKU cvv
+    // Kart ile ödeme doğrulama
+    EĞER kart doğrulandı mı? İSE
+        YAZ "Ödeme başarılı."
+    DEĞİLSE
+        YAZ "Ödeme başarısız. Lütfen başka yöntem seçin."
+        // İsteğe bağlı: tekrar ödeme seçeneğine dön
+        DUR
+    BİTİŞEĞER
+DEĞİLSE EĞER odeme_secim = "2" İSE
+    odeme_yontemi = "Kapıda Ödeme"
+    YAZ "Kapıda ödeme seçildi."
+DEĞİLSE EĞER odeme_secim = "3" İSE
+    odeme_yontemi = "Havale/EFT"
+    YAZ "Banka bilgileri gösteriliyor. İşlem tamamlandığında lütfen bildiriniz."
+DEĞİLSE
+    YAZ "Geçersiz seçim. İşlem iptal."
+    DUR
+BİTİŞEĞER
+
+// --- Sipariş Onayı ---
+YAZ "Siparişi onaylıyor musunuz? (E/H)"
+OKU onay
+EĞER onay = "E" VEYA onay = "e" İSE
+    // Stok güncellemesi ve sipariş kaydı
+    DÖNGÜ her sepet öğesi İÇİN
+        EĞER katalog[öğe.urun_id].stok >= öğe.adet İSE
+            katalog[öğe.urun_id].stok = katalog[öğe.urun_id].stok - öğe.adet
+        DEĞİLSE
+            YAZ "Sipariş sırasında stok problemi: ", öğe.isim
+            YAZ "İşlem iptal ediliyor."
+            DUR
+        BİTİŞEĞER
+    BİTİŞDÖNGÜ
+
+    siparis_id = siparis_olustur(kullanici_ad, sepet, genel_toplam, odeme_yontemi)
+    YAZ "Siparişiniz oluşturuldu. Sipariş No: ", siparis_id
+    YAZ "Teşekkürler!"
+DEĞİLSE
+    YAZ "Sipariş onaylanmadı. Sepete dönülüyor."
+    // Opsiyonel: sepete dön veya çık
+    DUR
+BİTİŞEĞER
+
+BİTİR
+
+
+Bana bununla ilgili öğrencilerin yazacağı şekilde max 5 6 cümle olacak şekilde açıklama yaz
+
+Bu algoritma, bir e-ticaret sitesinde ürün ekleme, sepet yönetimi ve ödeme sürecini adım adım açıklar.
+Kullanıcı giriş yaptıktan sonra ürün kategorileri arasında gezebilir ve istediği ürünü sepete ekler.
+Sistem, stok kontrolü yaparak ürünün mevcut olup olmadığını denetler.
+Sepet görüntülendikten sonra kullanıcı indirim kodu uygulayabilir ve toplam tutar hesaplanır.
+200 TL üzeri alışverişlerde kargo ücretsizdir, aksi halde kargo ücreti eklenir.
+Son olarak kullanıcı ödeme yöntemini seçer ve siparişini onaylayarak işlemi tamamlar.
+
+bu pseudocode'u dot kodu olarak yaz
+
+Harika 👍
+Aşağıda, e-ticaret sitesinde ürün ekleme, sepet yönetimi ve ödeme süreci için tüm adımları içeren detaylı Graphviz DOT kodu bulunuyor.
+Bu diyagramda şunlar yer alır:
+
+Kullanıcı girişi (koşul)
+
+Ürün kategorilerinde gezinme (döngü)
+
+Stok kontrolü (koşul)
+
+İndirim kodu (koşul)
+
+Kargo hesaplama (koşul)
+
+Ödeme seçimi ve sipariş onayı (koşul)
+
+Bu kodu flowchart.dot dosyasına yapıştırıp, terminalde şu komutla görselleştirebilirsin 👇
+
+dot -Tpng flowchart.dot -o flowchart.png
+
+🛒 E-TİCARET SİSTEMİ – DOT KODU
+digraph E_TICARET_SISTEMI {
+    rankdir=TB;
+    node [shape=rectangle, style=rounded, fontname="Arial"];
+
+    START [label="BAŞLA", shape=circle, style=filled, fillcolor=lightgreen];
+    END [label="BİTİR", shape=doublecircle, style=filled, fillcolor=lightblue];
+
+    // --- Kullanıcı Girişi ---
+    GIRIS [label="OKU: Kullanıcı adı ve şifre"];
+    GIRIS_KONTROL [label="EĞER giriş bilgileri doğru mu?", shape=diamond];
+    GIRIS_HATA [label="YAZ: 'Giriş başarısız!'\nSistemden çık", shape=rectangle];
+    GIRIS_OK [label="YAZ: 'Giriş başarılı!'", shape=rectangle];
+
+    // --- Ürün Kategorileri ---
+    KATEGORI_DONGU [label="DÖNGÜ: Ürün kategorilerinde gezin"];
+    URUN_SEC [label="OKU: Seçilen ürün ve adet"];
+    STOK_KONTROL [label="EĞER stok yeterli mi?", shape=diamond];
+    STOK_YETERSIZ [label="YAZ: 'Stok yetersiz!'", shape=rectangle];
+    URUN_SEPETE [label="YAZ: Ürün sepete eklendi", shape=rectangle];
+    DEVAM_MI [label="EĞER başka kategori gezmek ister misiniz?", shape=diamond];
+
+    // --- Sepet Görüntüleme ve Düzenleme ---
+    SEPET_GOR [label="YAZ: Sepeti görüntüle\nToplamı hesapla", shape=rectangle];
+    SEPET_DUZENLE [label="EĞER sepet düzenlenecek mi?", shape=diamond];
+    DUZENLE [label="YAZ: Ürün sil/güncelle", shape=rectangle];
+
+    // --- İndirim Kodu ---
+    INDIRIM_SOR [label="EĞER indirim kodu var mı?", shape=diamond];
+    INDIRIM_GIR [label="OKU: İndirim kodu", shape=parallelogram];
+    INDIRIM_GECERSIZ [label="YAZ: 'Geçersiz kod'", shape=rectangle];
+    INDIRIM_UYGULA [label="YAZ: 'İndirim uygulandı'", shape=rectangle];
+
+    // --- Minimum Tutar ve Kargo ---
+    MIN_KONTROL [label="EĞER toplam >= 50 TL mi?", shape=diamond];
+    MIN_HATA [label="YAZ: 'Minimum sipariş tutarı 50 TL!'", shape=rectangle];
+    KARGO_KONTROL [label="EĞER toplam >= 200 TL mi?", shape=diamond];
+    KARGO_UCRETSIZ [label="YAZ: 'Ücretsiz kargo'", shape=rectangle];
+    KARGO_VAR [label="YAZ: 'Kargo ücreti 20 TL'", shape=rectangle];
+
+    // --- Ödeme Seçimi ---
+    ODEME_SECIM [label="OKU: Ödeme yöntemi seç (1-KK,2-Kapıda,3-Havale)", shape=parallelogram];
+    ODEME_KONTROL [label="EĞER geçerli yöntem mi?", shape=diamond];
+    ODEME_HATA [label="YAZ: 'Geçersiz ödeme yöntemi!'", shape=rectangle];
+
+    // --- Sipariş Onayı ---
+    ONAY [label="EĞER siparişi onaylıyor musunuz?", shape=diamond];
+    SIPARIS_OLUSTUR [label="YAZ: 'Sipariş oluşturuldu'\nStok güncelle", shape=rectangle];
+    IPTAL [label="YAZ: 'Sipariş onaylanmadı'", shape=rectangle];
+
+    // --- Bağlantılar ---
+    START -> GIRIS;
+    GIRIS -> GIRIS_KONTROL;
+    GIRIS_KONTROL -> GIRIS_OK [label="Evet"];
+    GIRIS_KONTROL -> GIRIS_HATA [label="Hayır"];
+    GIRIS_HATA -> END;
+
+    GIRIS_OK -> KATEGORI_DONGU;
+    KATEGORI_DONGU -> URUN_SEC;
+    URUN_SEC -> STOK_KONTROL;
+
+    STOK_KONTROL -> URUN_SEPETE [label="Evet"];
+    STOK_KONTROL -> STOK_YETERSIZ [label="Hayır"];
+    STOK_YETERSIZ -> KATEGORI_DONGU;
+
+    URUN_SEPETE -> DEVAM_MI;
+    DEVAM_MI -> KATEGORI_DONGU [label="Evet"];
+    DEVAM_MI -> SEPET_GOR [label="Hayır"];
+
+    SEPET_GOR -> SEPET_DUZENLE;
+    SEPET_DUZENLE -> DUZENLE [label="Evet"];
+    DUZENLE -> SEPET_GOR;
+    SEPET_DUZENLE -> INDIRIM_SOR [label="Hayır"];
+
+    INDIRIM_SOR -> INDIRIM_GIR [label="Evet"];
+    INDIRIM_SOR -> MIN_KONTROL [label="Hayır"];
+    INDIRIM_GIR -> INDIRIM_UYGULA [label="Geçerli"];
+    INDIRIM_GIR -> INDIRIM_GECERSIZ [label="Geçersiz"];
+    INDIRIM_GECERSIZ -> MIN_KONTROL;
+    INDIRIM_UYGULA -> MIN_KONTROL;
+
+    MIN_KONTROL -> KARGO_KONTROL [label="Evet"];
+    MIN_KONTROL -> MIN_HATA [label="Hayır"];
+    MIN_HATA -> SEPET_GOR;
+
+    KARGO_KONTROL -> KARGO_UCRETSIZ [label="Evet"];
+    KARGO_KONTROL -> KARGO_VAR [label="Hayır"];
+    KARGO_UCRETSIZ -> ODEME_SECIM;
+    KARGO_VAR -> ODEME_SECIM;
+
+    ODEME_SECIM -> ODEME_KONTROL;
+    ODEME_KONTROL -> ONAY [label="Evet"];
+    ODEME_KONTROL -> ODEME_HATA [label="Hayır"];
+    ODEME_HATA -> END;
+
+    ONAY -> SIPARIS_OLUSTUR [label="Evet"];
+    ONAY -> IPTAL [label="Hayır"];
+    SIPARIS_OLUSTUR -> END;
+    IPTAL -> END;
+}
