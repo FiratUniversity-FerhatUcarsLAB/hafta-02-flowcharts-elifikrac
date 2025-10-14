@@ -1,0 +1,99 @@
+digraph E_TICARET_SISTEMI {
+    rankdir=TB;
+    node [shape=rectangle, style=rounded, fontname="Arial"];
+
+    START [label="BAŞLA", shape=circle, style=filled, fillcolor=lightgreen];
+    END [label="BİTİR", shape=doublecircle, style=filled, fillcolor=lightblue];
+
+    // --- Kullanıcı Girişi ---
+    GIRIS [label="OKU: Kullanıcı adı ve şifre"];
+    GIRIS_KONTROL [label="EĞER giriş bilgileri doğru mu?", shape=diamond];
+    GIRIS_HATA [label="YAZ: 'Giriş başarısız!'\nSistemden çık", shape=rectangle];
+    GIRIS_OK [label="YAZ: 'Giriş başarılı!'", shape=rectangle];
+
+    // --- Ürün Kategorileri ---
+    KATEGORI_DONGU [label="DÖNGÜ: Ürün kategorilerinde gezin"];
+    URUN_SEC [label="OKU: Seçilen ürün ve adet"];
+    STOK_KONTROL [label="EĞER stok yeterli mi?", shape=diamond];
+    STOK_YETERSIZ [label="YAZ: 'Stok yetersiz!'", shape=rectangle];
+    URUN_SEPETE [label="YAZ: Ürün sepete eklendi", shape=rectangle];
+    DEVAM_MI [label="EĞER başka kategori gezmek ister misiniz?", shape=diamond];
+
+    // --- Sepet Görüntüleme ve Düzenleme ---
+    SEPET_GOR [label="YAZ: Sepeti görüntüle\nToplamı hesapla", shape=rectangle];
+    SEPET_DUZENLE [label="EĞER sepet düzenlenecek mi?", shape=diamond];
+    DUZENLE [label="YAZ: Ürün sil/güncelle", shape=rectangle];
+
+    // --- İndirim Kodu ---
+    INDIRIM_SOR [label="EĞER indirim kodu var mı?", shape=diamond];
+    INDIRIM_GIR [label="OKU: İndirim kodu", shape=parallelogram];
+    INDIRIM_GECERSIZ [label="YAZ: 'Geçersiz kod'", shape=rectangle];
+    INDIRIM_UYGULA [label="YAZ: 'İndirim uygulandı'", shape=rectangle];
+
+    // --- Minimum Tutar ve Kargo ---
+    MIN_KONTROL [label="EĞER toplam >= 50 TL mi?", shape=diamond];
+    MIN_HATA [label="YAZ: 'Minimum sipariş tutarı 50 TL!'", shape=rectangle];
+    KARGO_KONTROL [label="EĞER toplam >= 200 TL mi?", shape=diamond];
+    KARGO_UCRETSIZ [label="YAZ: 'Ücretsiz kargo'", shape=rectangle];
+    KARGO_VAR [label="YAZ: 'Kargo ücreti 20 TL'", shape=rectangle];
+
+    // --- Ödeme Seçimi ---
+    ODEME_SECIM [label="OKU: Ödeme yöntemi seç (1-KK,2-Kapıda,3-Havale)", shape=parallelogram];
+    ODEME_KONTROL [label="EĞER geçerli yöntem mi?", shape=diamond];
+    ODEME_HATA [label="YAZ: 'Geçersiz ödeme yöntemi!'", shape=rectangle];
+
+    // --- Sipariş Onayı ---
+    ONAY [label="EĞER siparişi onaylıyor musunuz?", shape=diamond];
+    SIPARIS_OLUSTUR [label="YAZ: 'Sipariş oluşturuldu'\nStok güncelle", shape=rectangle];
+    IPTAL [label="YAZ: 'Sipariş onaylanmadı'", shape=rectangle];
+
+    // --- Bağlantılar ---
+    START -> GIRIS;
+    GIRIS -> GIRIS_KONTROL;
+    GIRIS_KONTROL -> GIRIS_OK [label="Evet"];
+    GIRIS_KONTROL -> GIRIS_HATA [label="Hayır"];
+    GIRIS_HATA -> END;
+
+    GIRIS_OK -> KATEGORI_DONGU;
+    KATEGORI_DONGU -> URUN_SEC;
+    URUN_SEC -> STOK_KONTROL;
+
+    STOK_KONTROL -> URUN_SEPETE [label="Evet"];
+    STOK_KONTROL -> STOK_YETERSIZ [label="Hayır"];
+    STOK_YETERSIZ -> KATEGORI_DONGU;
+
+    URUN_SEPETE -> DEVAM_MI;
+    DEVAM_MI -> KATEGORI_DONGU [label="Evet"];
+    DEVAM_MI -> SEPET_GOR [label="Hayır"];
+
+    SEPET_GOR -> SEPET_DUZENLE;
+    SEPET_DUZENLE -> DUZENLE [label="Evet"];
+    DUZENLE -> SEPET_GOR;
+    SEPET_DUZENLE -> INDIRIM_SOR [label="Hayır"];
+
+    INDIRIM_SOR -> INDIRIM_GIR [label="Evet"];
+    INDIRIM_SOR -> MIN_KONTROL [label="Hayır"];
+    INDIRIM_GIR -> INDIRIM_UYGULA [label="Geçerli"];
+    INDIRIM_GIR -> INDIRIM_GECERSIZ [label="Geçersiz"];
+    INDIRIM_GECERSIZ -> MIN_KONTROL;
+    INDIRIM_UYGULA -> MIN_KONTROL;
+
+    MIN_KONTROL -> KARGO_KONTROL [label="Evet"];
+    MIN_KONTROL -> MIN_HATA [label="Hayır"];
+    MIN_HATA -> SEPET_GOR;
+
+    KARGO_KONTROL -> KARGO_UCRETSIZ [label="Evet"];
+    KARGO_KONTROL -> KARGO_VAR [label="Hayır"];
+    KARGO_UCRETSIZ -> ODEME_SECIM;
+    KARGO_VAR -> ODEME_SECIM;
+
+    ODEME_SECIM -> ODEME_KONTROL;
+    ODEME_KONTROL -> ONAY [label="Evet"];
+    ODEME_KONTROL -> ODEME_HATA [label="Hayır"];
+    ODEME_HATA -> END;
+
+    ONAY -> SIPARIS_OLUSTUR [label="Evet"];
+    ONAY -> IPTAL [label="Hayır"];
+    SIPARIS_OLUSTUR -> END;
+    IPTAL -> END;
+}
