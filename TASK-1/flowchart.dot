@@ -1,0 +1,68 @@
+digraph ATM_Para_Cekme {
+    rankdir=TB;
+    node [shape=rectangle, style=rounded, fontname="Arial"];
+
+    // Başlangıç ve bitiş düğümleri
+    START [label="BAŞLA", shape=circle, style=filled, fillcolor=lightgreen];
+    END [label="BİTİR", shape=doublecircle, style=filled, fillcolor=lightblue];
+
+    // PIN işlemleri
+    PIN_GIRIS [label="OKU: PIN gir", shape=parallelogram];
+    PIN_KONTROL [label="EĞER PIN doğru mu?", shape=diamond];
+    HATALI_PIN [label="YAZ: 'Hatalı PIN!'", shape=rectangle];
+    PIN_HAK_KONTROL [label="EĞER kalan hak > 0 mı?", shape=diamond];
+    BLOKE [label="YAZ: 'Kart bloke oldu'\nİşlem sonlandırılır", shape=rectangle];
+
+    // Bakiye ve tutar işlemleri
+    BAKIYE_YAZ [label="YAZ: Bakiye ve limit bilgisi", shape=rectangle];
+    TUTAR_GIR [label="OKU: Çekilecek tutar", shape=parallelogram];
+    KONTROL_20 [label="EĞER tutar 20'nin katı mı?", shape=diamond];
+    HATA_20 [label="YAZ: 'Tutar 20 TL'nin katı olmalı!'", shape=rectangle];
+
+    LIMIT_KONTROL [label="EĞER günlük limit aşılır mı?", shape=diamond];
+    HATA_LIMIT [label="YAZ: 'Günlük limit aşıldı!'", shape=rectangle];
+
+    BAKIYE_KONTROL [label="EĞER bakiye yeterli mi?", shape=diamond];
+    HATA_BAKIYE [label="YAZ: 'Yetersiz bakiye!'", shape=rectangle];
+
+    PARA_VER [label="YAZ: 'Para ve fiş veriliyor'", shape=rectangle];
+    BAKIYE_GUNCELLE [label="BAKİYE ← BAKİYE - TUTAR\nGÜNLÜK ÇEKİLEN ← +TUTAR", shape=rectangle];
+
+    TEKRAR [label="EĞER başka işlem yapmak ister misiniz?", shape=diamond];
+    EVET [label="EVET", shape=plaintext];
+    HAYIR [label="HAYIR", shape=plaintext];
+
+    // Bağlantılar
+    START -> PIN_GIRIS;
+    PIN_GIRIS -> PIN_KONTROL;
+
+    PIN_KONTROL -> BAKIYE_YAZ [label="Evet"];
+    PIN_KONTROL -> HATALI_PIN [label="Hayır"];
+
+    HATALI_PIN -> PIN_HAK_KONTROL;
+    PIN_HAK_KONTROL -> PIN_GIRIS [label="Evet"];
+    PIN_HAK_KONTROL -> BLOKE [label="Hayır"];
+    BLOKE -> END;
+
+    // Ana işlem akışı
+    BAKIYE_YAZ -> TUTAR_GIR;
+    TUTAR_GIR -> KONTROL_20;
+
+    KONTROL_20 -> LIMIT_KONTROL [label="Evet"];
+    KONTROL_20 -> HATA_20 [label="Hayır"];
+    HATA_20 -> TUTAR_GIR;
+
+    LIMIT_KONTROL -> BAKIYE_KONTROL [label="Hayır aşılmadı"];
+    LIMIT_KONTROL -> HATA_LIMIT [label="Aşıldı"];
+    HATA_LIMIT -> TUTAR_GIR;
+
+    BAKIYE_KONTROL -> PARA_VER [label="Evet"];
+    BAKIYE_KONTROL -> HATA_BAKIYE [label="Hayır"];
+    HATA_BAKIYE -> TUTAR_GIR;
+
+    PARA_VER -> BAKIYE_GUNCELLE;
+    BAKIYE_GUNCELLE -> TEKRAR;
+
+    TEKRAR -> BAKIYE_YAZ [label="Evet"];
+    TEKRAR -> END [label="Hayır"];
+}
