@@ -1,0 +1,254 @@
+Bir ATM’den paraçekme işleminin tüm adımlarını modelleyin. 
+ Sistem Gereksinimleri:
+ Kart takılır ve PIN sorulur
+ 3 hatalı PIN girişinden sonra kart bloke olur (döngü) 
+ Bakiye sorgulanır
+ çekilmek istenen tutar girilir 
+ Yetersiz bakiye kontrolü yapılır (koşul) 
+ 20 TL’nin katları olmalı (koşul) 
+ Günlük limit kontrolü (koşul) 
+ Para verilir ve fiş çıkar 
+ Başka işlem yapmak ister misiniz? (döngü) “ATM para çekme sistemi için detaylı pseudocode yazmanı istiyorum. 
+ Şunları içermeli: PIN doğrulama (3 hak), bakiye kontrolü, tutar 
+ kontrolü (20 TL katları), günlük limit kontrolü, işlem tekrarı seçeneği. Tüm 
+ adımları BAŞLA, OKU, YAZ, EĞER- İSE, DÖNGÜ yapılarıyla yaz
+
+Elbette! Aşağıda istediğin şekilde ATM para çekme işleminin tüm adımlarını içeren detaylı bir pseudocode hazırlanmıştır.
+Tüm işlemler “BAŞLA, OKU, YAZ, EĞER–İSE, DEĞİLSE, DÖNGÜ” yapılarıyla yazılmıştır.
+
+💳 ATM Para Çekme İşlemi – Pseudocode
+BAŞLA
+
+//--- Değişkenler ---
+bakiye ← 5000
+gunluk_limit ← 2000
+pin_hak ← 3
+dogru_pin ← 1234
+cekilen_toplam ← 0
+
+//--- PIN Doğrulama ---
+DÖNGÜ pin_hak > 0 İKEN
+    YAZ "Lütfen PIN kodunuzu giriniz:"
+    OKU girilen_pin
+    
+    EĞER girilen_pin = dogru_pin İSE
+        YAZ "PIN doğrulandı."
+        ÇIK // Döngüden çık
+    DEĞİLSE
+        pin_hak ← pin_hak - 1
+        YAZ "Hatalı PIN! Kalan hakkınız: ", pin_hak
+    BİTİŞEĞER
+BİTİŞDÖNGÜ
+
+EĞER pin_hak = 0 İSE
+    YAZ "Kartınız bloke olmuştur. Lütfen banka ile iletişime geçiniz."
+    DUR
+BİTİŞEĞER
+
+//--- İşlem Döngüsü ---
+DÖNGÜ sonsuz
+    YAZ "Bakiyeniz: ", bakiye, " TL"
+    YAZ "Günlük limitiniz: ", gunluk_limit - cekilen_toplam, " TL"
+    
+    YAZ "Çekmek istediğiniz tutarı giriniz:"
+    OKU tutar
+    
+    //--- Tutar kontrolü ---
+    EĞER tutar % 20 ≠ 0 İSE
+        YAZ "Hata: Çekilecek tutar 20 TL'nin katı olmalıdır!"
+        DEVAM ET // Döngü başına dön
+    BİTİŞEĞER
+    
+    //--- Günlük limit kontrolü ---
+    EĞER cekilen_toplam + tutar > gunluk_limit İSE
+        YAZ "Günlük limit aşıldı! En fazla ", gunluk_limit - cekilen_toplam, " TL çekebilirsiniz."
+        DEVAM ET
+    BİTİŞEĞER
+    
+    //--- Bakiye kontrolü ---
+    EĞER tutar > bakiye İSE
+        YAZ "Yetersiz bakiye! Bakiyeniz: ", bakiye, " TL"
+        DEVAM ET
+    BİTİŞEĞER
+    
+    //--- İşlem Onay ---
+    bakiye ← bakiye - tutar
+    cekilen_toplam ← cekilen_toplam + tutar
+    
+    YAZ "Lütfen paranızı ve fişinizi alınız."
+    YAZ "Yeni bakiyeniz: ", bakiye, " TL"
+    
+    //--- Tekrar işlem seçeneği ---
+    YAZ "Başka bir işlem yapmak ister misiniz? (E/H)"
+    OKU cevap
+    
+    EĞER cevap = "H" VEYA cevap = "h" İSE
+        YAZ "Kartınızı almayı unutmayınız. İyi günler!"
+        DUR
+    DEĞİLSE
+        DEVAM ET // yeni işlem için döngü tekrar başa döner
+    BİTİŞEĞER
+
+BİTİŞDÖNGÜ
+
+BİTİR
+
+⚙️ Bu modelde:
+
+PIN doğrulama döngüsü: 3 hakkınız var, yanlış girerseniz kart bloke olur.
+
+Koşullar:
+
+tutar % 20 = 0 → 20 TL katı kontrolü
+
+tutar <= bakiye → bakiye kontrolü
+
+tutar + cekilen_toplam <= gunluk_limit → günlük limit kontrolü
+
+Döngüler:
+
+PIN girişinde 3 deneme hakkı
+
+İşlem tekrarı (başka işlem yapmak ister misiniz?)
+
+Bana bununla ilgili öğrencilerin yazacağı şekilde max 5 6 cümle olacak şekilde açıklama yaz
+
+Bu algoritma, bir ATM’den para çekme işleminin adımlarını gösterir.
+Kullanıcı önce kartını takar ve PIN kodunu girer; üç yanlış denemede kart bloke olur.
+Doğru PIN girildikten sonra kullanıcı çekmek istediği tutarı belirler.
+Sistem, tutarın 20 TL’nin katı olup olmadığını, bakiyenin yeterli olup olmadığını ve günlük limitin aşılmadığını kontrol eder.
+Tüm koşullar uygunsa para ve fiş verilir.
+Son olarak kullanıcıya başka işlem yapmak isteyip istemediği sorulur.
+
+Bir ATM’den paraçekme işleminin tüm adımlarını modelleyin. 
+ Sistem Gereksinimleri:
+ Kart takılır ve PIN sorulur
+ 3 hatalı PIN girişinden sonra kart bloke olur (döngü) 
+ Bakiye sorgulanır
+ çekilmek istenen tutar girilir 
+ Yetersiz bakiye kontrolü yapılır (koşul) 
+ 20 TL’nin katları olmalı (koşul) 
+ Günlük limit kontrolü (koşul) 
+ Para verilir ve fiş çıkar 
+ Başka işlem yapmak ister misiniz? (döngü) “ATM para çekme sistemi için detaylı DOT kodu yazmanı istiyorum. 
+ Şunları içermeli: PIN doğrulama (3 hak), bakiye kontrolü, tutar 
+ kontrolü (20 TL katları), günlük limit kontrolü, işlem tekrarı seçeneği. Tüm 
+ adımları BAŞLA, OKU, YAZ, EĞER- İSE, DÖNGÜ yapılarıyla yaz
+
+Bir ATM’den paraçekme işleminin tüm adımlarını modelleyin. 
+ Sistem Gereksinimleri:
+ Kart takılır ve PIN sorulur
+ 3 hatalı PIN girişinden sonra kart bloke olur (döngü) 
+ Bakiye sorgulanır
+ çekilmek istenen tutar girilir 
+ Yetersiz bakiye kontrolü yapılır (koşul) 
+ 20 TL’nin katları olmalı (koşul) 
+ Günlük limit kontrolü (koşul) 
+ Para verilir ve fiş çıkar 
+ Başka işlem yapmak ister misiniz? (döngü) “ATM para çekme sistemi için detaylı DOT kodu yazmanı istiyorum. 
+ Şunları içermeli: PIN doğrulama (3 hak), bakiye kontrolü, tutar 
+ kontrolü (20 TL katları), günlük limit kontrolü, işlem tekrarı seçeneği. Tüm 
+ adımları BAŞLA, OKU, YAZ, EĞER- İSE, DÖNGÜ yapılarıyla yaz
+ChatGPT:
+
+Elbette! 💳
+Aşağıda istediğin tüm adımları (PIN doğrulama, bakiye kontrolü, 20 TL katı, günlük limit, işlem tekrarı vb.) içeren detaylı Graphviz DOT kodu verilmiştir.
+Bu kodu flowchart.dot dosyasına yapıştırabilir, ardından Graphviz ile .png çıktısı oluşturabilirsin:
+
+dot -Tpng flowchart.dot -o flowchart.png
+
+🧠 ATM PARA ÇEKME SİSTEMİ – DOT KODU
+digraph ATM_Para_Cekme {
+    rankdir=TB;
+    node [shape=rectangle, style=rounded, fontname="Arial"];
+
+    // Başlangıç ve bitiş düğümleri
+    START [label="BAŞLA", shape=circle, style=filled, fillcolor=lightgreen];
+    END [label="BİTİR", shape=doublecircle, style=filled, fillcolor=lightblue];
+
+    // PIN işlemleri
+    PIN_GIRIS [label="OKU: PIN gir", shape=parallelogram];
+    PIN_KONTROL [label="EĞER PIN doğru mu?", shape=diamond];
+    HATALI_PIN [label="YAZ: 'Hatalı PIN!'", shape=rectangle];
+    PIN_HAK_KONTROL [label="EĞER kalan hak > 0 mı?", shape=diamond];
+    BLOKE [label="YAZ: 'Kart bloke oldu'\nİşlem sonlandırılır", shape=rectangle];
+
+    // Bakiye ve tutar işlemleri
+    BAKIYE_YAZ [label="YAZ: Bakiye ve limit bilgisi", shape=rectangle];
+    TUTAR_GIR [label="OKU: Çekilecek tutar", shape=parallelogram];
+    KONTROL_20 [label="EĞER tutar 20'nin katı mı?", shape=diamond];
+    HATA_20 [label="YAZ: 'Tutar 20 TL'nin katı olmalı!'", shape=rectangle];
+
+    LIMIT_KONTROL [label="EĞER günlük limit aşılır mı?", shape=diamond];
+    HATA_LIMIT [label="YAZ: 'Günlük limit aşıldı!'", shape=rectangle];
+
+    BAKIYE_KONTROL [label="EĞER bakiye yeterli mi?", shape=diamond];
+    HATA_BAKIYE [label="YAZ: 'Yetersiz bakiye!'", shape=rectangle];
+
+    PARA_VER [label="YAZ: 'Para ve fiş veriliyor'", shape=rectangle];
+    BAKIYE_GUNCELLE [label="BAKİYE ← BAKİYE - TUTAR\nGÜNLÜK ÇEKİLEN ← +TUTAR", shape=rectangle];
+
+    TEKRAR [label="EĞER başka işlem yapmak ister misiniz?", shape=diamond];
+    EVET [label="EVET", shape=plaintext];
+    HAYIR [label="HAYIR", shape=plaintext];
+
+    // Bağlantılar
+    START -> PIN_GIRIS;
+    PIN_GIRIS -> PIN_KONTROL;
+
+    PIN_KONTROL -> BAKIYE_YAZ [label="Evet"];
+    PIN_KONTROL -> HATALI_PIN [label="Hayır"];
+
+    HATALI_PIN -> PIN_HAK_KONTROL;
+    PIN_HAK_KONTROL -> PIN_GIRIS [label="Evet"];
+    PIN_HAK_KONTROL -> BLOKE [label="Hayır"];
+    BLOKE -> END;
+
+    // Ana işlem akışı
+    BAKIYE_YAZ -> TUTAR_GIR;
+    TUTAR_GIR -> KONTROL_20;
+
+    KONTROL_20 -> LIMIT_KONTROL [label="Evet"];
+    KONTROL_20 -> HATA_20 [label="Hayır"];
+    HATA_20 -> TUTAR_GIR;
+
+    LIMIT_KONTROL -> BAKIYE_KONTROL [label="Hayır aşılmadı"];
+    LIMIT_KONTROL -> HATA_LIMIT [label="Aşıldı"];
+    HATA_LIMIT -> TUTAR_GIR;
+
+    BAKIYE_KONTROL -> PARA_VER [label="Evet"];
+    BAKIYE_KONTROL -> HATA_BAKIYE [label="Hayır"];
+    HATA_BAKIYE -> TUTAR_GIR;
+
+    PARA_VER -> BAKIYE_GUNCELLE;
+    BAKIYE_GUNCELLE -> TEKRAR;
+
+    TEKRAR -> BAKIYE_YAZ [label="Evet"];
+    TEKRAR -> END [label="Hayır"];
+}
+
+📘 Açıklama:
+
+Bu diyagramda:
+
+DÖNGÜ yapıları:
+
+PIN doğrulama (3 hak)
+
+“Başka işlem yapmak ister misiniz?” seçeneği
+
+KOŞULLAR:
+
+PIN doğru mu
+
+Tutar 20 TL’nin katı mı
+
+Günlük limit aşılıyor mu
+
+Bakiye yeterli mi
+
+EYLEMLER (YAZ/OKU):
+
+Kullanıcıdan PIN veya tutar alma
+
+Hata ve bilgi mesajları yazma
