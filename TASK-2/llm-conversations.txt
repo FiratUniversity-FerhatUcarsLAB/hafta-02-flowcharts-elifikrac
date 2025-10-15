@@ -361,3 +361,138 @@ digraph E_TICARET_SISTEMI {
     SIPARIS_OLUSTUR -> END;
     IPTAL -> END;
 }
+ E-ticaret sitesinde urun ekleme, sepet yonetimi ve odeme surecini modelleyin. 
+ Sistem Gereksinimleri:
+ Kullanıcı giris kontrolu (kosul) 
+ Urun kategorileri arasında gezinme (dongu) 
+  Urun sepete ekleme 
+ Stok kontrolu (kosul) 
+ Sepeti goruntuleme ve duzenleme (dongu)  Indirim kodu uygulanabilir (kosul) 
+ Minimum 50 TL kontrolu (ko¸sul) 
+ Kargo ucreti hesaplama (kosul: ¿200 TL ucretsiz) 
+ Odeme yontemi secimi (kosul) 
+ Siparis onayı “E-ticaret sitesinde sepet yonetimi ve odeme sistemini adım adım acıkla. 
+ Kullanıcı girisi, urun ekleme, stok kontrolu, indirim kodu, kargo hesaplama 
+ ve odeme asamalarını icermeli. Bu sistemi pseudocode'u DOT kodu olarak yaz. Donguler için DONGU, koşullar için  
+ EGER- İISE kullan. Her adımı BASLA ile başlat, BITIR ile bitir. Tüm 
+ kontrol noktalarını belirt graphviz için uygun olsun
+
+digraph E_Ticaret_Sepet_Odeme {
+  rankdir=TB;
+  node [fontname="Helvetica, Arial", fontsize=12];
+
+  // Start / End
+  start [label="BASLA\nSistem Başlat", shape=oval];
+  end [label="BITIR\nSistem Sonlandır", shape=oval];
+
+  // Login
+  n_login_check [label="BASLA\nEGER-ISE: Kullanıcı Girişli mi?\n(Başlangıç Kontrol)\nBITIR", shape=diamond];
+  n_prompt_login [label="BASLA\nKullanıcı Giriş Formu Göster\n(Kullanıcı adı/şifre)\nBITIR", shape=box];
+  n_login_fail [label="BASLA\nGiriş Başarısız -> HATA Mesajı\nBITIR", shape=box];
+
+  // Category navigation loop
+  n_cat_loop [label="BASLA\nDONGU: Kategori Listesini Göster / Gezin\n(Bir kategori seçilebilir)\nBITIR", shape=box];
+
+  // Product selection & add to cart
+  n_select_product [label="BASLA\nÜrün Seçimi\n(Ürün detayları göster)\nBITIR", shape=box];
+  n_add_to_cart [label="BASLA\nSepete Ekle isteği\nBITIR", shape=box];
+
+  // Stock check
+  n_stock_check [label="BASLA\nEGER-ISE: Stok Var mı?\n(Adet kontrolü)\nBITIR", shape=diamond];
+  n_out_of_stock [label="BASLA\nStok YOK -> Kullanıcıya Bilgi\nBITIR", shape=box];
+  n_increment_cart [label="BASLA\nSepete Ürün Eklendi / Adet Güncelle\nBITIR", shape=box];
+
+  // View/Edit cart loop
+  n_view_cart_loop [label="BASLA\nDONGU: Sepeti Görüntüle ve Düzenle\n(Adet değiştir/ürün sil)\nBITIR", shape=box];
+  n_apply_discount [label="BASLA\nEGER-ISE: İndirim Kodu Uygula?\nBITIR", shape=diamond];
+  n_validate_coupon [label="BASLA\nEGER-ISE: İndirim Kodu Geçerli mi?\nBITIR", shape=diamond];
+  n_coupon_invalid [label="BASLA\nİndirim Kodu Geçersiz -> Hata Mesajı\nBITIR", shape=box];
+  n_apply_coupon_success [label="BASLA\nİndirim Uygulandı -> Toplam Güncellendi\nBITIR", shape=box];
+
+  // Minimum order check
+  n_minimum_check [label="BASLA\nEGER-ISE: Toplam >= 50 TL mi?\n(Minimum Sipariş Kontrolü)\nBITIR", shape=diamond];
+  n_below_minimum [label="BASLA\nToplam < 50 TL -> Uyarı (Sepeti Güncelle veya Daha Fazla Ürün Ekle)\nBITIR", shape=box];
+
+  // Shipping fee calculation
+  n_shipping_calc [label="BASLA\nEGER-ISE: Toplam >= 200 TL mi?\n(Eğer Evet -> Kargo Ücretsiz)\n(Değilse Kargo Ücreti Ekle)\nBITIR", shape=diamond];
+  n_shipping_free [label="BASLA\nKargo Ücretsiz\nBITIR", shape=box];
+  n_shipping_charge [label="BASLA\nKargo Ücreti Hesaplandı ve Toplama Eklendi\nBITIR", shape=box];
+
+  // Payment selection and processing
+  n_payment_selection [label="BASLA\nDONGU: Ödeme Yöntemi Seçimi\n(Kredi Kartı / Havale / Kapıda vs.)\nBITIR", shape=box];
+  n_payment_method_check [label="BASLA\nEGER-ISE: Seçilen Ödeme Yöntemi Geçerli mi?\nBITIR", shape=diamond];
+  n_payment_process [label="BASLA\nÖdeme İşlemini Başlat (Ödeme Ağ Geçidi)\nBITIR", shape=box];
+  n_payment_success [label="BASLA\nEGER-ISE: Ödeme Başarılı mı?\nBITIR", shape=diamond];
+  n_payment_fail [label="BASLA\nÖdeme Başarısız -> Hata / Tekrar Deneme\nBITIR", shape=box];
+
+  // Order confirmation
+  n_order_confirm [label="BASLA\nSipariş Onayı Oluştur\n(Sipariş Numarası, E-posta Gönderimi)\nBITIR", shape=box];
+
+  // Edges - Start flow
+  start -> n_login_check;
+
+  // Login flow
+  n_login_check -> n_prompt_login [label="EĞER değilse"];
+  n_prompt_login -> n_login_check [label="DONGU: Giriş denemesi -> tekrar kontrol"];
+  n_login_check -> n_cat_loop [label="EĞER evet"];
+
+  // Optional failure exit
+  n_login_check -> n_login_fail [label="EĞER kilitli / 3 başarısız ise"];
+  n_login_fail -> end [label="BITIR"];
+
+  // Category navigation loop -> product actions
+  n_cat_loop -> n_select_product;
+  n_select_product -> n_add_to_cart;
+
+  // Add to cart -> stock check
+  n_add_to_cart -> n_stock_check;
+  n_stock_check -> n_increment_cart [label="EĞER evet"];
+  n_stock_check -> n_out_of_stock [label="EĞER hayır"];
+  n_out_of_stock -> n_cat_loop [label="DONGU: Başka ürün seç"];
+  n_increment_cart -> n_cat_loop [label="DONGU: Kategorilerde gezinmeye devam veya Sepeti Gör"];
+
+  // User chooses to view/edit cart
+  n_cat_loop -> n_view_cart_loop [label="Kullanıcı -> Sepeti Gör"];
+
+  // View/Edit cart loop: edits, apply coupon
+  n_view_cart_loop -> n_apply_discount;
+  n_apply_discount -> n_validate_coupon [label="EĞER evet"];
+  n_apply_discount -> n_minimum_check [label="EĞER hayır"];
+
+  n_validate_coupon -> n_apply_coupon_success [label="EĞER evet"];
+  n_validate_coupon -> n_coupon_invalid [label="EĞER hayır"];
+  n_coupon_invalid -> n_view_cart_loop [label="DONGU: Yeniden dene veya devam"];
+  n_apply_coupon_success -> n_minimum_check;
+
+  // Minimum order check
+  n_minimum_check -> n_below_minimum [label="EĞER hayır"];
+  n_minimum_check -> n_shipping_calc [label="EĞER evet"];
+  n_below_minimum -> n_view_cart_loop [label="DONGU: Kullanıcı Sepeti Günceller veya Ürün Ekle"];
+
+  // Shipping calculation
+  n_shipping_calc -> n_shipping_free [label="EĞER evet"];
+  n_shipping_calc -> n_shipping_charge [label="EĞER hayır"];
+  n_shipping_free -> n_payment_selection;
+  n_shipping_charge -> n_payment_selection;
+
+  // Payment selection loop & validation
+  n_payment_selection -> n_payment_method_check;
+  n_payment_method_check -> n_payment_process [label="EĞER evet"];
+  n_payment_method_check -> n_payment_selection [label="EĞER hayır -> Başka yöntem seç (DONGU)"];
+
+  // Payment processing -> success/fail
+  n_payment_process -> n_payment_success;
+  n_payment_success -> n_order_confirm [label="EĞER evet"];
+  n_payment_success -> n_payment_fail [label="EĞER hayır"];
+  n_payment_fail -> n_payment_selection [label="DONGU: Tekrar Ödeme Yöntemi Seçimi"];
+
+  // After order confirmation -> end
+  n_order_confirm -> end;
+
+  // Safety loops: kullanıcı istediğinde sepet görüntülemeye geri dönebilir
+  n_view_cart_loop -> n_cat_loop [label="Kullanıcı -> Alışverişe devam et (DONGU)"];
+  n_view_cart_loop -> n_payment_selection [label="Kullanıcı -> Ödemeye geç"];
+
+  // Aesthetic
+  { rank=same; n_shipping_free; n_shipping_charge; }
+}
