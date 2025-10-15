@@ -1,1 +1,294 @@
+IoT tabanlı akıllı ev guvenlik sisteminin alarm ve bildirim süreçlerini 
+ modelleyin.
+ Sistem Gereksinimleri:
+ Sistem aktif mi kontrolü (kosul) 
+ Sensör okuma dongusu (döngü- sürekli) 
+ Hareket sensörü kontrolü (koşul) 
+ Kapı/pencere sensörü kontrolü (koşul) 
+ Kamera aktivasyonu (koşul) 
+ Yanlış alarm kontrolü (ev sahibi evde mi?) (koşul) 
+ Alarm seviyesi belirleme (1-dusuk, 2-orta, 3-yuksek) (koşul) 
+ Bildirim gönderme (SMS + App + Email) 
+ Bekle ve tekrar kontrol et (döngü) 
+ Alarm sıfırlama veya devam ettirme (koşul) Akıllı ev güvenlik sistemi 7/24 çalışır. Ana döngü içinde sensor okuma, 
+ tehdit algılama, alarm verme ve bildirim gönderme süreçlerini içeren 
+ pseudocode yaz
+ChatGPT:
+21s boyunca düşündüm
+BASLA
+  // Sistem başlangıcı ve aktiflik kontrolü
+  BASLA
+    YAZ "Sistem başlatılıyor..."
+    SISTEM_AKTIF = TRUE
+  BITIR
 
+  // Sürekli ana döngü: sensör okuma ve tehdit tespiti
+  DONGU  // sürekli çalışır
+    BASLA
+      // 1) Sistem aktif mi?
+      BASLA
+        EGER-ISE SISTEM_AKTIF == FALSE
+          YAZ "Sistem pasif. Bekleniyor..."
+          DONGU  // döngü içinde bekle ve tekrar kontrol et
+            BASLA
+              SLEEP(1 dakika)
+              EGER-ISE SISTEM_AKTIF == TRUE
+                BREAK  // sisteme tekrar geçiş
+              İSE SONU
+            DONGU SONU
+        DEGILSE
+          // Sistem aktifse sensör okumalarına devam et
+        İSE SONU
+      BITIR
+
+      // 2) Sensör okumaları (hareket, kapı/pencere, kamera durumu vb.)
+      BASLA
+        HAREKET_VERI = SENSOR_OKU("hareket")
+        KAPI_VERI = SENSOR_OKU("kapi_pencere")
+        CAM_ONLINE = KAMERA_DURUMU()
+        BATTERY_STATUS = SENSOR_BATTERY_STATUS()
+        ZAMAN_STAMP = SIMDI()
+      BITIR
+
+      // 3) Tehdit tespiti: hangi sensörler tetiklendi?
+      BASLA
+        TEHDITLER = []
+        EGER-ISE HAREKET_VERI == "TETIK" İSE
+          TEHDITLER'E_EKLE("Hareket")
+        İSE SONU
+
+        EGER-ISE KAPI_VERI == "ACILDI" İSE
+          TEHDITLER'E_EKLE("Kapı/Pencere")
+        İSE SONU
+
+        // Diğer sensörler eklenebilir (cam kırılma, duman, gaz vb.)
+      BITIR
+
+      // 4) Eğer tehdit yoksa kısa bekle ve döngüye geri dön
+      BASLA
+        EGER-ISE UZUNLUK(TEHDITLER) == 0 İSE
+          SLEEP(5 saniye)
+          CONTINUE  // döngü başa dönsün
+        İSE SONU
+      BITIR
+
+      // 5) Kamera aktivasyonu - varsa kayıt ve canlı yayın başlat
+      BASLA
+        EGER-ISE CAM_ONLINE == TRUE İSE
+          KAMERA_BASLAT("kayit")
+          KAMERA_CANLI_YAYIN(BASLAT = TRUE)
+        DEGILSE
+          YAZ "Kamera çevrimiçi değil, sadece sensör verisi var."
+        İSE SONU
+      BITIR
+
+      // 6) Yanlış alarm kontrolü: ev sahibi evde mi? (geofencing / kullanıcı onayı)
+      BASLA
+        EV_SAHIBI_EVINDE = KULLANICI_DURUMU("evde_mi")  // TRUE/FALSE/UNKNOWN
+        EGER-ISE EV_SAHIBI_EVINDE == TRUE İSE
+          // Ev sahibinin evde olduğu durumda yanlış alarm olma olasılığı yüksek
+          YAZ "Ev sahibi evde: Ön alarm (doğrulama gerekli)."
+          // Ev sahibine otomatik bildirim / doğrulama sorusu gönder
+          BILDIRIM_GONDER("owner", "Önemli: Evde hareket tespit edildi. Alarm onaylıyor musunuz? (E/H)")
+          // Kısa süre bekle doğrulama için
+          DONGU
+            BASLA
+              SLEEP(20 saniye)
+              OWNER_RESPONSE = BILDIRI_CEVAP_AL("owner")
+              EGER-ISE OWNER_RESPONSE == "E" İSE
+                // Ev sahibi alarmı onayladı -> tam alarm
+                BREAK
+              EGER-ISE OWNER_RESPONSE == "H" İSE
+                // Ev sahibi yanlış alarm olduğunu onayladı -> alarmı sıfırla
+                YAZ "Ev sahibi yanlış alarm bildirdi. Alarm sıfırlanıyor."
+                ALARM_DURUM = "SIFIRLANMIS"
+                ALARM_RESET()
+                CONTINUE  // ana döngüye dön
+              DEGILSE
+                // cevap yoksa tekrar kontrol et veya zaman aşımı
+                EGER-ISE SURE > 60 saniye İSE
+                  BREAK
+                İSE SONU
+              İSE SONU
+            BITIR
+          DONGU SONU
+        DEGILSE
+          YAZ "Ev sahibi evde değil veya durum bilinmiyor: alarm prosedürü devam ediyor."
+        İSE SONU
+      BITIR
+
+      // 7) Alarm seviyesi belirleme (1: düşük, 2: orta, 3: yüksek)
+      BASLA
+        ALARM_SEVIYESI = 1  // varsayılan düşük
+        EGER-ISE "Kapı/Pencere" IN TEHDITLER VE "Hareket" IN TEHDITLER İSE
+          ALARM_SEVIYESI = 3
+        DEGILSE EGER "Kapı/Pencere" IN TEHDITLER VE "Hareket" NOT IN TEHDITLER İSE
+          ALARM_SEVIYESI = 2
+        DEGILSE EGER "Hareket" IN TEHDITLER VE EK_SENSOR_GUVENIYORSA İSE
+          ALARM_SEVIYESI = 2
+        DEGILSE
+          ALARM_SEVIYESI = 1
+        İSE SONU
+        YAZ "Belirlenen alarm seviyesi: ", ALARM_SEVIYESI
+      BITIR
+
+      // 8) Bildirim oluşturma ve gönderme (SMS, App, Email)
+      BASLA
+        MESAJ = FORMAT("Alarm Seviyesi: %d. Tespit: %s. Zaman: %s", ALARM_SEVIYESI, TEHDITLER, ZAMAN_STAMP)
+        BILDIRIM_GONDER("sms", MESAJ)
+        BILDIRIM_GONDER("app", MESAJ)
+        BILDIRIM_GONDER("email", MESAJ)
+        LOG_YAZ("ALARM", MESAJ)
+      BITIR
+
+      // 9) Bekle ve tekrar kontrol et (escalation / tekrar doğrulama)
+      BASLA
+        EGER-ISE ALARM_SEVIYESI == 3 İSE
+          // Yüksek seviye -> acil durum servisleri ile paylaşma opsiyonu
+          YAZ "Yüksek alarm: Acil durum servisine bildirim gönderilsin mi? (E/H)"
+          RESP = KULLANICI_ONAYI_AL()  // sistem ayarlarına göre otomatik olabilir
+          EGER-ISE RESP == "E" İSE
+            SERVIS_BILDIR("112/Polis", MESAJ)
+            LOG_YAZ("ESKALASYON", "Acil servise bildirildi.")
+          DEGILSE
+            YAZ "Acil servis bildirimi iptal edildi."
+          İSE SONU
+        DEGILSE
+          // Orta/düşük seviyede, kısa süreli tekrar izle
+          YAZ "Kısa süreli izleme başlıyor..."
+          FOR i FROM 1 TO 6 DONGU  // örn. 6 kere 10 saniye = 60 sn izle
+            BASLA
+              SLEEP(10 saniye)
+              YENI_HAREKET = SENSOR_OKU("hareket")
+              YENI_KAPI = SENSOR_OKU("kapi_pencere")
+              EGER-ISE YENI_HAREKET == "TETIK" VE YENI_KAPI == "ACILDI" İSE
+                YAZ "İzleme sırasında artan tehdit tespit edildi. Yeniden değerlendiriliyor..."
+                BREAK
+              İSE
+                CONTINUE
+              İSE SONU
+            BITIR
+          DONGU SONU
+        İSE SONU
+      BITIR
+
+      // 10) Alarm sıfırlama veya devam ettirme
+      BASLA
+        // Kullanıcı müdahalesi veya otomatik sıfırlama kontrolleri
+        EGER-ISE KULLANICI_MUDAHALE_EDDI_MI() İSE
+          YAZ "Kullanıcı müdahalesi tespit edildi. Alarm sıfırlanıyor."
+          ALARM_RESET()
+          CONTINUE  // ana döngüye dön
+        DEGILSE
+          EGER-ISE TEHDITLER devam ediyor İSE
+            YAZ "Tehdit devam ediyor. Alarm aktif kalıyor."
+            // gerekirse tekrar bildirim gönder veya ısrarla servis çağır
+            CONTINUE
+          DEGILSE
+            YAZ "Tehdit sona erdi. Alarm otomatik sıfırlanıyor."
+            ALARM_RESET()
+            CONTINUE
+          İSE SONU
+        İSE SONU
+      BITIR
+
+    BITIR
+  DONGU SONU
+
+BITIR
+
+
+Bu pseudocode:
+
+Tüm ana gereksinimleri içerir: sistem aktif kontrolü, sürekli sensör okuma döngüsü, hareket / kapı-pencere kontrolü, kamera aktivasyonu, yanlış alarm doğrulama (ev sahibi evde mi), alarm seviyesi tayini, SMS/App/Email bildirimleri, bekle ve tekrar kontrol etme ile alarmı sıfırlama veya devam ettirme.
+
+İstenirse bunu DOT (Graphviz) formatına çevirebilir veya her modülü ayrı renkli bloklar halinde görselleştirebilirim. İstersen devam edeyim mi?
+
+Şunu dedin:
+bu pseudocode'u DOT koduna çevir
+ChatGPT:
+
+Tabii! Aşağıda verdiğimiz IoT tabanlı akıllı ev güvenlik sistemi pseudocode’u için Graphviz DOT formatı hazırlanmıştır.
+Koşullar (EGER–İSE), döngüler (DONGU) ve ana işlem adımları akış diyagramına uygun şekilde gösterilmiştir.
+
+digraph AkilliEvGuvenlik {
+  rankdir=TB;
+  node [shape=rectangle, style=rounded, fontname="Arial"];
+
+  BASLA [label="BASLA\nSistem Başlat"];
+  SistemAktifKontrol [shape=diamond, label="EGER Sistem Aktif mi?"];
+  PasifBekle [label="Sistem Pasif, Bekleniyor..."];
+  
+  SensorOku [label="Sensörleri Oku\n(Hareket, Kapı/Pencere, Kamera)"];
+  TehditKontrol [label="Tehdit Tespiti\nHareket/Kapı/Pencere"];
+  TehditYok [label="Tehdit yok -> Kısa bekle ve tekrar"];
+  
+  KameraAktivasyon [shape=diamond, label="EGER Kamera Online mı?"];
+  KameraCalistir [label="Kamera Kaydı Başlat / Canlı Yayın"];
+  KameraPasif [label="Sadece sensör verisi var"];
+  
+  YanlisAlarmKontrol [shape=diamond, label="EGER Ev sahibi evde mi?"];
+  Evde [label="Ön alarm, ev sahibine bildirim gönder"];
+  EvdeDegil [label="Ev sahibi evde değil: Alarm devam"];
+  
+  AlarmSeviyesi [label="Alarm Seviyesi Belirle (1-düşük,2-orta,3-yüksek)"];
+  BildirimGonder [label="Bildirim Gönder\n(SMS + App + Email)"];
+  
+  BekleTekrar [label="Bekle ve tekrar kontrol et / İzleme"];
+  AlarmSifirlaDevam [shape=diamond, label="EGER Alarm Sıfırlanmalı mı?"];
+  AlarmSifirla [label="Alarm Sıfırla"];
+  AlarmDevam [label="Alarm devam ediyor"];
+  
+  BITIR [label="BITIR"];
+
+  // Akış bağlantıları
+  BASLA -> SistemAktifKontrol;
+  SistemAktifKontrol -> SensorOku [label="Evet"];
+  SistemAktifKontrol -> PasifBekle [label="Hayır"];
+  PasifBekle -> SistemAktifKontrol;
+  
+  SensorOku -> TehditKontrol;
+  TehditKontrol -> TehditYok [label="Tehdit Yok"];
+  TehditYok -> SensorOku;
+  
+  TehditKontrol -> KameraAktivasyon [label="Tehdit Var"];
+  KameraAktivasyon -> KameraCalistir [label="Evet"];
+  KameraAktivasyon -> KameraPasif [label="Hayır"];
+  
+  KameraCalistir -> YanlisAlarmKontrol;
+  KameraPasif -> YanlisAlarmKontrol;
+  
+  YanlisAlarmKontrol -> Evde [label="Evet"];
+  YanlisAlarmKontrol -> EvdeDegil [label="Hayır"];
+  Evde -> AlarmSeviyesi;
+  EvdeDegil -> AlarmSeviyesi;
+  
+  AlarmSeviyesi -> BildirimGonder;
+  BildirimGonder -> BekleTekrar;
+  BekleTekrar -> AlarmSifirlaDevam;
+  
+  AlarmSifirlaDevam -> AlarmSifirla [label="Evet"];
+  AlarmSifirlaDevam -> AlarmDevam [label="Hayır"];
+  
+  AlarmSifirla -> SensorOku;
+  AlarmDevam -> SensorOku;
+}
+
+🔹 Açıklama:
+
+Oval düğüm yok, tüm adımlar kutu şeklinde ve döngüler akış içinde tekrar başa dönecek şekilde tasarlandı.
+
+Koşul düğümleri: Sistem aktif mi? Kamera online mı? Ev sahibi evde mi? Alarm sıfırlanmalı mı?
+
+Döngüler: Sürekli sensör okuma, bekleme ve tekrar kontrol etme
+
+Bildirim ve alarm seviyesi belirleme modülleri akışa dahil edildi.
+
+İstersen bunu renkli ve modül bazlı (sensör okuma, alarm seviyesi, bildirim) şekilde daha görsel bir akış diyagramına dönüştürebilirim.
+Bunu yapmamı ister misin?
+
+Şunu dedin:
+bu konuyla ilgili max 5 6 cümlelik açıklama yaz
+ChatGPT:
+
+Bu sistem, IoT tabanlı bir akıllı evde güvenliği 7/24 sağlar. Sistem aktif olduğu sürece hareket, kapı/pencere ve kamera sensörleri sürekli olarak izlenir. Tehdit tespit edildiğinde kamera kayıtları başlatılır ve alarm seviyesi belirlenir (düşük, orta, yüksek). Ev sahibi evdeyse yanlış alarm kontrolü yapılır, gerekirse kullanıcıdan onay alınır. Belirlenen alarm seviyesine göre SMS, mobil uygulama ve e-posta ile bildirim gönderilir. Alarm durumu, kullanıcı müdahalesi veya otomatik kontrollerle sıfırlanır veya devam ettirilir, sistem döngüsel olarak tekrar çalışır.
