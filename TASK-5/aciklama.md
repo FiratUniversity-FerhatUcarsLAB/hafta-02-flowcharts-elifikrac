@@ -1,3 +1,2 @@
+Bu sistem, IoT tabanlı bir akıllı evde güvenliği 7/24 sağlar. Sistem aktif olduğu sürece hareket, kapı/pencere ve kamera sensörleri sürekli olarak izlenir. Tehdit tespit edildiğinde kamera kayıtları başlatılır ve alarm seviyesi belirlenir (düşük, orta, yüksek). Ev sahibi evdeyse yanlış alarm kontrolü yapılır, gerekirse kullanıcıdan onay alınır. Belirlenen alarm seviyesine göre SMS, mobil uygulama ve e-posta ile bildirim gönderilir. Alarm durumu, kullanıcı müdahalesi veya otomatik kontrollerle sıfırlanır veya devam ettirilir, sistem döngüsel olarak tekrar çalışır.
 
-
-sistemin kısa açıklaması (maks. 5-6 satır)
