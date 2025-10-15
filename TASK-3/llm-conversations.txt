@@ -1,0 +1,233 @@
+Hastanede randevu alma ve tahlil sonuclarına erişim sistemini modelleyin. 
+ Sistem Gereksinimleri:
+ Hasta kimlik doğrulama (TC No) 
+ ˙
+ Islem seçimi: 1-Randevu Al, 2-Tahlil Sonucu Gör (koşul) 
+ Randevu modülü: Poliklinik seçimi, doktor listesi, uygun saatler 
+ (döngü) 
+ Randevu onayı ve SMS gönderimi 
+ Tahlil modülü: Tahlil var mı kontrolü (koşul) 
+ Sonuç hazır mı kontrolü (koşul) 
+ Sonuç goruntuleme veya bekleme mesajı 
+ Sonuçları PDF indir seçeneği 
+ Başka işlem yapmak ister misiniz? (döngü) “Hastane randevu sistemi için algoritma: kimlik doğrulama, poliklinik seçimi, doktor listesi goruntuleme, uygun saatleri gösterme, randevu 
+ onaylama ve SMS gönderme. Pseudocode yaz.
+ChatGPT:
+
+İşte hastane randevu alma ve tahlil sonuçlarını görüntüleme sistemi için tüm koşulları ve döngüleri içeren, EĞER-İSE ve DONGU yapılarıyla hazırlanmış adım adım pseudocode (öğrenci düzeyinde sade, ama sistematik):
+
+🏥 Hastane Randevu Sistemi – Pseudocode
+BASLA
+  // Kimlik doğrulama
+  YAZ "TC Kimlik Numaranızı Giriniz: "
+  TC = GİRİŞ_AL()
+
+  EGER TC GEÇERLİ İSE
+      YAZ "Hoşgeldiniz, lütfen yapmak istediğiniz işlemi seçin:"
+      YAZ "1 - Randevu Al"
+      YAZ "2 - Tahlil Sonuçlarını Gör"
+
+      ISLEM = GİRİŞ_AL()
+
+      // Randevu modülü
+      EGER ISLEM == 1 İSE
+          YAZ "Poliklinik Listesi Gösteriliyor..."
+          
+          DONGU (Poliklinikler arasında gezin)
+              YAZ "Poliklinik Adı:"
+              POLIKLINIK = SEÇİM_YAP()
+          DONGU SONU
+          
+          YAZ "Seçilen Poliklinikteki Doktorlar Gösteriliyor..."
+          
+          DONGU (Doktor listesi içinde gezin)
+              YAZ "Doktor Adı:"
+              DOKTOR = SEÇİM_YAP()
+          DONGU SONU
+          
+          YAZ "Uygun Randevu Saatleri Gösteriliyor..."
+          
+          DONGU (Uygun saat listesi boyunca)
+              YAZ "Saat:"
+              SAAT = SEÇİM_YAP()
+          DONGU SONU
+
+          YAZ "Randevu Onaylanıyor..."
+          RANDEVU_OLUSTUR(TC, POLIKLINIK, DOKTOR, SAAT)
+
+          YAZ "Randevu Onaylandı!"
+          SMS_GONDER(TC, "Randevunuz onaylandı.")
+
+      // Tahlil sonuçları modülü
+      EĞER ISLEM == 2 İSE
+          YAZ "Tahlil kayıtları kontrol ediliyor..."
+
+          EGER TAHLIL_VAR_MI(TC) İSE
+              YAZ "Tahlil kaydı bulundu, sonuç durumu kontrol ediliyor..."
+
+              EGER SONUC_HAZIR_MI(TC) İSE
+                  YAZ "Tahlil Sonuçlarınız Hazır:"
+                  SONUCU_GOSTER(TC)
+
+                  YAZ "PDF olarak indirmek ister misiniz? (E/H)"
+                  CEVAP = GİRİŞ_AL()
+                  
+                  EGER CEVAP == "E" İSE
+                      PDF_INDIR(TC)
+                  DEGILSE
+                      YAZ "İndirme iptal edildi."
+                  İSE SONU
+              DEGILSE
+                  YAZ "Sonuçlar henüz hazır değil. Lütfen daha sonra tekrar deneyin."
+              İSE SONU
+          DEGILSE
+              YAZ "Tahlil kaydı bulunamadı."
+          İSE SONU
+      DEGILSE
+          YAZ "Geçersiz işlem seçtiniz."
+      İSE SONU
+
+      // Tekrar işlem yapmak isteği
+      DONGU
+          YAZ "Başka bir işlem yapmak ister misiniz? (E/H)"
+          CEVAP2 = GİRİŞ_AL()
+          
+          EGER CEVAP2 == "E" İSE
+              TEKRAR BASA_DON()
+          DEGILSE
+              CIKIS
+          İSE SONU
+      DONGU SONU
+  DEGILSE
+      YAZ "Kimlik doğrulama başarısız! Giriş reddedildi."
+  İSE SONU
+
+BITIR
+
+💡 Açıklama Özeti:
+
+Koşullar (EGER–İSE):
+
+Kimlik doğrulama
+
+İşlem seçimi (1: Randevu, 2: Tahlil)
+
+Tahlil var mı?
+
+Sonuç hazır mı?
+
+PDF indir onayı
+
+Döngüler (DONGU):
+
+Poliklinik listesi
+
+Doktor listesi
+
+Uygun saatler
+
+Başka işlem yapmak isteği
+
+İstersen bunu Graphviz DOT diyagramı biçiminde (flowchart oluşturmak için) düzenleyebilirim — tıpkı e-ticaret örneği gibi, her adımı düğüm ve koşul olarak gösterebilirim.
+İster misin onu da Graphviz formatında hazırlayayım?
+
+Şunu dedin:
+bu pseudocode'u DOT koduna çevir
+ChatGPT:
+
+Tabii ✅ Aşağıda, verdiğim hastane randevu ve tahlil sistemi pseudocode’unun Graphviz’e (DOT formatına) çevrilmiş hali yer alıyor.
+Bu kodu .dot dosyası olarak kaydedip Graphviz
+ gibi çevrimiçi araçlarla çalıştırarak akış diyagramı şeklinde görebilirsin.
+
+digraph Hastane_Randevu_Sistemi {
+  rankdir=TB;
+  node [fontname="Helvetica", fontsize=12, shape=box];
+
+  start [label="BASLA\nSistem Başlat", shape=oval];
+  end [label="BITIR\nSistem Sonu", shape=oval];
+
+  // Kimlik doğrulama
+  n_tc_input [label="BASLA\nTC Kimlik Numaranızı Giriniz\nBITIR"];
+  n_tc_check [label="BASLA\nEGER-ISE: TC Geçerli mi?\nBITIR", shape=diamond];
+  n_tc_fail [label="BASLA\nKimlik Doğrulama Başarısız\nBITIR"];
+
+  // İşlem seçimi
+  n_islem_sec [label="BASLA\nİşlem Seçimi:\n1-Randevu Al\n2-Tahlil Gör\nBITIR"];
+  n_islem_invalid [label="BASLA\nGeçersiz İşlem Seçildi\nBITIR"];
+
+  // --- Randevu Modülü ---
+  n_randevu_start [label="BASLA\nRandevu Modülü Başlat\nBITIR"];
+  n_poliklinik_loop [label="BASLA\nDONGU: Poliklinik Listesi Göster\nPoliklinik Seçimi\nBITIR"];
+  n_doktor_loop [label="BASLA\nDONGU: Doktor Listesi Göster\nDoktor Seçimi\nBITIR"];
+  n_saat_loop [label="BASLA\nDONGU: Uygun Saatleri Göster\nSaat Seçimi\nBITIR"];
+  n_randevu_onay [label="BASLA\nRandevu Oluştur ve Onayla\nBITIR"];
+  n_sms_gonder [label="BASLA\nSMS Gönderimi: Randevu Onaylandı\nBITIR"];
+
+  // --- Tahlil Modülü ---
+  n_tahlil_start [label="BASLA\nTahlil Sonuç Modülü Başlat\nBITIR"];
+  n_tahlil_kontrol [label="BASLA\nEGER-ISE: Tahlil Kaydı Var mı?\nBITIR", shape=diamond];
+  n_tahlil_yok [label="BASLA\nTahlil Kaydı Bulunamadı\nBITIR"];
+  n_sonuc_hazir [label="BASLA\nEGER-ISE: Sonuç Hazır mı?\nBITIR", shape=diamond];
+  n_sonuc_bekle [label="BASLA\nSonuçlar Henüz Hazır Değil\nBITIR"];
+  n_sonuc_goster [label="BASLA\nTahlil Sonuçlarını Görüntüle\nBITIR"];
+  n_pdf_sor [label="BASLA\nPDF Olarak İndirilsin mi? (E/H)\nBITIR"];
+  n_pdf_indir [label="BASLA\nPDF Dosyası İndirildi\nBITIR"];
+  n_pdf_iptal [label="BASLA\nPDF İndirme İptal Edildi\nBITIR"];
+
+  // --- Tekrar İşlem Döngüsü ---
+  n_tekrar_sor [label="BASLA\nBaşka İşlem Yapmak İster misiniz? (E/H)\nBITIR"];
+  n_tekrar_evet [label="BASLA\nSistemi Baştan Başlat\nBITIR"];
+  n_tekrar_hayir [label="BASLA\nSistemden Çıkış\nBITIR"];
+
+  // --- Akış ---
+  start -> n_tc_input -> n_tc_check;
+
+  n_tc_check -> n_islem_sec [label="EGER evet"];
+  n_tc_check -> n_tc_fail [label="EGER hayır"];
+  n_tc_fail -> end;
+
+  // İşlem seçimi
+  n_islem_sec -> n_randevu_start [label="EGER 1 (Randevu Al)"];
+  n_islem_sec -> n_tahlil_start [label="EGER 2 (Tahlil Sonuçları)"];
+  n_islem_sec -> n_islem_invalid [label="EGER diğer"];
+  n_islem_invalid -> n_tekrar_sor;
+
+  // --- Randevu Modülü Akışı ---
+  n_randevu_start -> n_poliklinik_loop -> n_doktor_loop -> n_saat_loop -> n_randevu_onay -> n_sms_gonder -> n_tekrar_sor;
+
+  // --- Tahlil Modülü Akışı ---
+  n_tahlil_start -> n_tahlil_kontrol;
+  n_tahlil_kontrol -> n_tahlil_yok [label="EGER hayır"];
+  n_tahlil_yok -> n_tekrar_sor;
+  n_tahlil_kontrol -> n_sonuc_hazir [label="EGER evet"];
+
+  n_sonuc_hazir -> n_sonuc_goster [label="EGER evet"];
+  n_sonuc_hazir -> n_sonuc_bekle [label="EGER hayır"];
+  n_sonuc_bekle -> n_tekrar_sor;
+
+  n_sonuc_goster -> n_pdf_sor;
+  n_pdf_sor -> n_pdf_indir [label="EGER Evet"];
+  n_pdf_sor -> n_pdf_iptal [label="EGER Hayır"];
+  n_pdf_indir -> n_tekrar_sor;
+  n_pdf_iptal -> n_tekrar_sor;
+
+  // --- Tekrar İşlem Döngüsü ---
+  n_tekrar_sor -> n_tekrar_evet [label="EGER Evet"];
+  n_tekrar_sor -> n_tekrar_hayir [label="EGER Hayır"];
+  n_tekrar_evet -> n_tc_input;  // Baştan döner
+  n_tekrar_hayir -> end;
+
+  // Gruplama (diyagramda hizalama)
+  { rank=same; n_randevu_start; n_tahlil_start; }
+  { rank=same; n_pdf_indir; n_pdf_iptal; }
+}
+
+🔍 Açıklama:
+
+Bu DOT akışı:
+
+Tüm koşulları (EGER-İSE) ve döngüleri (DONGU) içerir.
+
+Hasta kimlik doğrulama, randevu süreci, tahlil kontrolü, PDF indirme ve tekrar işlem döngüsünü ayrı modüller olarak gösterir.
+
+Her işlem düğümü “BASLA… BITIR” biçiminde biçimlendirilmiştir, Graphviz uyumludur.
