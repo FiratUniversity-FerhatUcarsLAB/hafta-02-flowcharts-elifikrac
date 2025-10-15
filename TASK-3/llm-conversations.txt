@@ -231,3 +231,8 @@ Tüm koşulları (EGER-İSE) ve döngüleri (DONGU) içerir.
 Hasta kimlik doğrulama, randevu süreci, tahlil kontrolü, PDF indirme ve tekrar işlem döngüsünü ayrı modüller olarak gösterir.
 
 Her işlem düğümü “BASLA… BITIR” biçiminde biçimlendirilmiştir, Graphviz uyumludur.
+
+bu konuyla ilgili max 5 6 cümlelik bir açıklama yaz
+ChatGPT:
+
+Bu sistem, hastaların kimlik doğrulaması yaparak hastane işlemlerini dijital ortamda gerçekleştirmesini sağlar. Kullanıcı giriş yaptıktan sonra randevu alma veya tahlil sonuçlarını görüntüleme seçeneklerinden birini seçer. Randevu modülünde poliklinik, doktor ve uygun saat seçimi yapılarak randevu onaylanır ve hastaya SMS gönderilir. Tahlil modülünde sistem önce hastanın tahlil kaydını ve sonuç durumunu kontrol eder. Sonuçlar hazırsa kullanıcı bunları görüntüleyebilir veya PDF olarak indirebilir. İşlem sonunda kullanıcı isterse yeni bir işlem başlatabilir ya da sistemden çıkış yapabilir.
