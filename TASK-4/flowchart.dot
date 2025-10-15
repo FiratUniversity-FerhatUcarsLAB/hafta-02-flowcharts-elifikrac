@@ -1,0 +1,62 @@
+digraph OgrenciDersKayit {
+  rankdir=TB;
+  node [shape=rectangle, style=rounded, fontname="Arial"];
+
+  BASLA [label="BASLA"];
+  Giris [label="Öğrenci No + Şifre Girişi"];
+  GirisKontrol [shape=diamond, label="EĞER giriş bilgileri doğru mu?"];
+  GirisHata [label="Hatalı giriş! Tekrar dene"];
+  
+  DersListesi [label="Ders Listesini Görüntüle"];
+  DersDongu [shape=diamond, label="DÖNGÜ: Her ders için"];
+  Kontenjan [shape=diamond, label="EĞER kontenjan dolu mu?"];
+  KontenjanUyari [label="Uyarı: Kontenjan dolu"];
+  
+  OnKosul [shape=diamond, label="EĞER önkoşul dersi tamamlandı mı?"];
+  OnKosulUyari [label="Uyarı: Önkoşul eksik"];
+  
+  ZamanCakis [shape=diamond, label="EĞER zaman çakışması var mı?"];
+  ZamanCakisUyari [label="Uyarı: Zaman çakışması"];
+  
+  KrediKontrol [shape=diamond, label="EĞER toplam kredi ≤ 35 mi?"];
+  KrediUyari [label="Uyarı: Kredi limiti aşıldı"];
+  
+  DersEkle [label="Ders ekle / çıkar"];
+  DanismanKontrol [shape=diamond, label="EĞER GPA < 2.5 mi?"];
+  DanismanOnay [label="Danışman onayı gerekli"];
+  
+  KayitOzeti [label="Kayıt özetini göster"];
+  KayitOnay [label="Kayıt onaylandı"];
+  Bitir [label="BİTİR"];
+
+  // Bağlantılar
+  BASLA -> Giris;
+  Giris -> GirisKontrol;
+  GirisKontrol -> DersListesi [label="Evet"];
+  GirisKontrol -> GirisHata [label="Hayır"];
+  GirisHata -> Giris;
+  
+  DersListesi -> DersDongu;
+  DersDongu -> Kontenjan [label="Yeni ders"];
+  Kontenjan -> KontenjanUyari [label="Evet"];
+  Kontenjan -> OnKosul [label="Hayır"];
+  
+  OnKosul -> OnKosulUyari [label="Hayır"];
+  OnKosul -> ZamanCakis [label="Evet"];
+  
+  ZamanCakis -> ZamanCakisUyari [label="Evet"];
+  ZamanCakis -> KrediKontrol [label="Hayır"];
+  
+  KrediKontrol -> KrediUyari [label="Hayır"];
+  KrediKontrol -> DersEkle [label="Evet"];
+  
+  DersEkle -> DersDongu [label="Sonraki ders"];
+  DersDongu -> DanismanKontrol [label="Tüm dersler tamamlandı"];
+  
+  DanismanKontrol -> DanismanOnay [label="Evet"];
+  DanismanKontrol -> KayitOzeti [label="Hayır"];
+  DanismanOnay -> KayitOzeti;
+  
+  KayitOzeti -> KayitOnay;
+  KayitOnay -> Bitir;
+}
