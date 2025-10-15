@@ -1,0 +1,62 @@
+digraph AkilliEvGuvenlik {
+  rankdir=TB;
+  node [shape=rectangle, style=rounded, fontname="Arial"];
+
+  BASLA [label="BASLA\nSistem Başlat"];
+  SistemAktifKontrol [shape=diamond, label="EGER Sistem Aktif mi?"];
+  PasifBekle [label="Sistem Pasif, Bekleniyor..."];
+  
+  SensorOku [label="Sensörleri Oku\n(Hareket, Kapı/Pencere, Kamera)"];
+  TehditKontrol [label="Tehdit Tespiti\nHareket/Kapı/Pencere"];
+  TehditYok [label="Tehdit yok -> Kısa bekle ve tekrar"];
+  
+  KameraAktivasyon [shape=diamond, label="EGER Kamera Online mı?"];
+  KameraCalistir [label="Kamera Kaydı Başlat / Canlı Yayın"];
+  KameraPasif [label="Sadece sensör verisi var"];
+  
+  YanlisAlarmKontrol [shape=diamond, label="EGER Ev sahibi evde mi?"];
+  Evde [label="Ön alarm, ev sahibine bildirim gönder"];
+  EvdeDegil [label="Ev sahibi evde değil: Alarm devam"];
+  
+  AlarmSeviyesi [label="Alarm Seviyesi Belirle (1-düşük,2-orta,3-yüksek)"];
+  BildirimGonder [label="Bildirim Gönder\n(SMS + App + Email)"];
+  
+  BekleTekrar [label="Bekle ve tekrar kontrol et / İzleme"];
+  AlarmSifirlaDevam [shape=diamond, label="EGER Alarm Sıfırlanmalı mı?"];
+  AlarmSifirla [label="Alarm Sıfırla"];
+  AlarmDevam [label="Alarm devam ediyor"];
+  
+  BITIR [label="BITIR"];
+
+  // Akış bağlantıları
+  BASLA -> SistemAktifKontrol;
+  SistemAktifKontrol -> SensorOku [label="Evet"];
+  SistemAktifKontrol -> PasifBekle [label="Hayır"];
+  PasifBekle -> SistemAktifKontrol;
+  
+  SensorOku -> TehditKontrol;
+  TehditKontrol -> TehditYok [label="Tehdit Yok"];
+  TehditYok -> SensorOku;
+  
+  TehditKontrol -> KameraAktivasyon [label="Tehdit Var"];
+  KameraAktivasyon -> KameraCalistir [label="Evet"];
+  KameraAktivasyon -> KameraPasif [label="Hayır"];
+  
+  KameraCalistir -> YanlisAlarmKontrol;
+  KameraPasif -> YanlisAlarmKontrol;
+  
+  YanlisAlarmKontrol -> Evde [label="Evet"];
+  YanlisAlarmKontrol -> EvdeDegil [label="Hayır"];
+  Evde -> AlarmSeviyesi;
+  EvdeDegil -> AlarmSeviyesi;
+  
+  AlarmSeviyesi -> BildirimGonder;
+  BildirimGonder -> BekleTekrar;
+  BekleTekrar -> AlarmSifirlaDevam;
+  
+  AlarmSifirlaDevam -> AlarmSifirla [label="Evet"];
+  AlarmSifirlaDevam -> AlarmDevam [label="Hayır"];
+  
+  AlarmSifirla -> SensorOku;
+  AlarmDevam -> SensorOku;
+}
